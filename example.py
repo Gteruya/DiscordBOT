@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
 # Copyright 2023 pigeon-sable
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
 Discord Bot プログラム：Discord Botとして動作します。
 """
 
-__author__ = ''
+__author__ = 'pigeon-sable'
 __version__ = '0.0.0'
 __date__ = '2023/02/22 (Created: 2023/02/22)'
 
 import sys
+import discord
 
 from config import CONFIG
 
@@ -33,7 +34,45 @@ def main():
     常に0を応答します。それが結果（リターンコード：終了ステータス）になることを想定しています。
     """
 
-    # print(CONFIG["ACCESS_TOKEN"])
+    client = discord.Client(intents=discord.Intents.default())
+
+    @client.event
+    async def on_ready():
+        for channel in client.get_all_channels():
+            if channel.name == 'tech-meetup':
+                CONFIG["VOICE_CHAT_ROOM_ID"] = channel.id
+                print('---------------------------------')
+                print('Channel Name: ' + channel.name)
+                print('Channel ID: ' + str(channel.id))
+                print('---------------------------------')
+            elif channel.name == 'lobby':
+                CONFIG["NOTIFY_ROOM_ID"] = channel.id
+                print('---------------------------------')
+                print('Channel Name: ' + channel.name)
+                print('Channel ID: ' + str(channel.id))
+                print('---------------------------------')
+
+    @client.event
+    async def on_voice_state_update(member, before, after):
+
+        if before.channel != after.channel:
+            # 通知メッセージを書き込むテキストチャンネル
+            notify_room = client.get_channel(CONFIG["NOTIFY_ROOM_ID"])
+
+            # 入退室を監視する対象のボイスチャンネル
+            voice_chat_room_id = CONFIG["VOICE_CHAT_ROOM_ID"]
+
+            # 入室通知
+            if after.channel is not None and after.channel.id == voice_chat_room_id:
+                await notify_room.send(f'** {after.channel.name} ** に、__{member.name}__ が入室しました！')
+                # print(f'** {after.channel.name} ** に、__{member.name}__ が入室しました！')
+
+            # 退室通知
+            if before.channel is not None and before.channel.id == voice_chat_room_id:
+                await notify_room.send(f'** {before.channel.name} ** から、__{member.name}__ が退出しました！')
+                # print(f'** {before.channel.name} ** から、__{member.name}__ が退出しました！')
+
+    client.run(CONFIG["ACCESS_TOKEN"])
 
     return 0
 
