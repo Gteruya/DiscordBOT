@@ -24,13 +24,21 @@ or
 $ git clone https://github.com/Gteruya/DiscordBOT.git
 ```
 
-1. Change the working directory
+2. Change the working directory
 
 ```
 $ cd DiscordBOT
 ```
 
-3. Run the program
+3. Rename .env_example to .env and enter your Discord Bot token.
+
+```
+$ mv .env_example .env
+$ vim .env
+ACCESS_TOKEN='123456789abcdefg'
+```
+
+4. Run the program
 
 ```
 $ make run
@@ -39,6 +47,7 @@ $ make run
 ## Licence
 
 [Apache License, Version2.0](https://github.com/Gteruya/DiscordBOT/blob/main/LICENSE)
+
 ## Author
 
 [Kobayashi123](https://github.com/Kobayashi123)
