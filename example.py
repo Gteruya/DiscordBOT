@@ -20,11 +20,12 @@ Discord Bot プログラム：Discord Botとして動作します。
 """
 
 __author__ = 'pigeon-sable'
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 __date__ = '2023/02/23 (Created: 2023/02/22)'
 
 import os
 import sys
+import datetime
 
 import discord
 from dotenv import load_dotenv
@@ -57,6 +58,7 @@ def main():
                 print('Channel ID: ' + str(channel.id))
                 print('---------------------------------')
 
+    member_list = {}
     @client.event
     async def on_voice_state_update(member, before, after):
 
@@ -69,12 +71,15 @@ def main():
 
             # 入室通知
             if after.channel is not None and after.channel.id == voice_chat_room_id:
+                member_list[member.id] = datetime.datetime.now()
                 await notify_room.send(f'** {after.channel.name} ** に、__{member.name}__ が入室しました！')
                 # print(f'** {after.channel.name} ** に、__{member.name}__ が入室しました！')
 
             # 退室通知
             if before.channel is not None and before.channel.id == voice_chat_room_id:
                 await notify_room.send(f'** {before.channel.name} ** から、__{member.name}__ が退出しました！')
+                await notify_room.send(f'{(datetime.datetime.now() - member_list[member.id]).seconds // 60}\
+分間作業をしていました。お疲れ様でした。')
                 # print(f'** {before.channel.name} ** から、__{member.name}__ が退出しました！')
 
     client.run(os.environ['ACCESS_TOKEN'])
