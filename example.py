@@ -20,33 +20,38 @@ Discord Bot プログラム：Discord Botとして動作します。
 """
 
 __author__ = 'pigeon-sable'
-__version__ = '0.0.0'
-__date__ = '2023/02/22 (Created: 2023/02/22)'
+__version__ = '0.0.1'
+__date__ = '2023/02/23 (Created: 2023/02/22)'
 
+import os
 import sys
-import discord
 
-from config import CONFIG
+import discord
+from dotenv import load_dotenv
 
 def main():
     """
     Discord Botとして動作するメイン（main）プログラムです。
     常に0を応答します。それが結果（リターンコード：終了ステータス）になることを想定しています。
     """
+    # .envファイルから環境変数を読み込む
+    load_dotenv()
 
     client = discord.Client(intents=discord.Intents.default())
+
+    room_id = {}
 
     @client.event
     async def on_ready():
         for channel in client.get_all_channels():
             if channel.name == 'tech-meetup':
-                CONFIG["VOICE_CHAT_ROOM_ID"] = channel.id
+                room_id["VOICE_CHAT_ROOM_ID"] = channel.id
                 print('---------------------------------')
                 print('Channel Name: ' + channel.name)
                 print('Channel ID: ' + str(channel.id))
                 print('---------------------------------')
             elif channel.name == 'lobby':
-                CONFIG["NOTIFY_ROOM_ID"] = channel.id
+                room_id["NOTIFY_ROOM_ID"] = channel.id
                 print('---------------------------------')
                 print('Channel Name: ' + channel.name)
                 print('Channel ID: ' + str(channel.id))
@@ -57,10 +62,10 @@ def main():
 
         if before.channel != after.channel:
             # 通知メッセージを書き込むテキストチャンネル
-            notify_room = client.get_channel(CONFIG["NOTIFY_ROOM_ID"])
+            notify_room = client.get_channel(room_id["NOTIFY_ROOM_ID"])
 
             # 入退室を監視する対象のボイスチャンネル
-            voice_chat_room_id = CONFIG["VOICE_CHAT_ROOM_ID"]
+            voice_chat_room_id = room_id["VOICE_CHAT_ROOM_ID"]
 
             # 入室通知
             if after.channel is not None and after.channel.id == voice_chat_room_id:
@@ -72,7 +77,7 @@ def main():
                 await notify_room.send(f'** {before.channel.name} ** から、__{member.name}__ が退出しました！')
                 # print(f'** {before.channel.name} ** から、__{member.name}__ が退出しました！')
 
-    client.run(CONFIG["ACCESS_TOKEN"])
+    client.run(os.environ['ACCESS_TOKEN'])
 
     return 0
 
